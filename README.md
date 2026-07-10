@@ -88,6 +88,11 @@ Keep handlers thin and move logic into services, then test the services.
 Test data is created with `Acms\Testing\Seeder\*` (Blog / Category / User / Entry / …). Integration
 tests run inside a transaction that is rolled back automatically.
 
+The PHPUnit bootstrap comes from the testing framework: `phpunit.xml.dist` points at
+`vendor/appleple/acms-testing-framework/bootstrap.php`, so there is no `tests/bootstrap.php` to
+maintain. If you need custom setup, add a `tests/bootstrap.php` that `require`s that shared entry and
+point `bootstrap` in `phpunit.xml.dist` back at it.
+
 ### Running tests against your own core
 
 Set `ACMS_ROOT` in `phpunit.xml.dist` to your a-blog cms root (inside Docker, the container path).
