@@ -9,6 +9,9 @@ parameters:
         max: 80500
     paths:
         - src
+        # Type-check the tests too. They rely on the base classes shipped by
+        # appleple/acms-testing-framework (resolved via the extension include above).
+        - tests
     bootstrapFiles:
         # Declares runtime constants (PLUGIN_DIR, ...) that PHPStan can't see statically.
         - phpstan-bootstrap.php
