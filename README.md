@@ -42,45 +42,6 @@ docker compose up -d
 docker compose exec acms bash -lc "cd /workspace && composer install && vendor/bin/phpunit"
 ```
 
-> **Note:** the bundled `docker-compose.yml` references `appleple/acms` (an all-in-one image, in
-> preparation) and `appleple/acms-testing-framework` is being published to Packagist. Until both are
-> available, see [Before publishing](#before-publishing-git-clone) and
-> [Running tests against your own core](#running-tests-against-your-own-core).
-
-## How `composer create-project` works
-
-`composer create-project VENDOR/PACKAGE target-dir` does three things:
-
-1. **Downloads** the package `VENDOR/PACKAGE` (this skeleton) into `target-dir/` — like a template
-   copy, but without any git history.
-2. **Installs its dependencies** (runs `composer install`).
-3. **Runs the `post-create-project-cmd` script** declared in the skeleton's `composer.json`. Here
-   that is `scripts/rename-namespace.php`, which renames `Skeleton` to the plugin name you enter and
-   then deletes itself.
-
-For step 1 to work, Composer has to be able to *find* `appleple/acms-plugin-skeleton`. That happens
-once this skeleton is published to **Packagist** (and the same is needed for its dependency
-`appleple/acms-testing-framework`). So:
-
-- **After publishing:** `composer create-project appleple/acms-plugin-skeleton my-plugin` just works.
-- **From GitHub directly (no Packagist):** you can also point Composer at the repo, but the
-  dependency still has to be resolvable, so this only helps once `acms-testing-framework` is on
-  Packagist:
-  ```bash
-  composer create-project appleple/acms-plugin-skeleton my-plugin \
-    --repository '{"type":"vcs","url":"https://github.com/appleple/acms-plugin-skeleton"}'
-  ```
-
-### Before publishing (git clone)
-
-Until the packages are published, clone and rename manually:
-
-```bash
-git clone https://github.com/appleple/acms-plugin-skeleton my-plugin
-cd my-plugin && rm -rf .git
-php scripts/rename-namespace.php MyAwesomePlugin
-```
-
 ## Layout
 
 Production code lives in **`src/`**, tests in **`tests/`**, and config files at the repository root.
@@ -160,8 +121,8 @@ PHPStan resolves a-blog cms core symbols via the extension shipped with
 
 `.github/workflows/test.yml` is a **sample** self-contained workflow: it boots a-blog cms + MySQL
 with `docker-compose.yml` and runs **coding standards (phpcs), static analysis (phpstan) and tests
-(phpunit)** in the container. Adjust it (image tag, license secret, PHP/DB versions) for your host,
-or replace it with Bitbucket Pipelines / CircleCI if you prefer.
+(phpunit)** in the container. Adjust it (image tag, PHP/DB versions) for your host, or replace it
+with Bitbucket Pipelines / CircleCI if you prefer.
 
 ## Renaming
 

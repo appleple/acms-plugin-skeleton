@@ -6,9 +6,7 @@ on: [push, pull_request]
 # docker-compose.yml, then runs composer install + acms-create-database + phpunit inside the
 # container (the same steps you run locally).
 #
-# It relies on the appleple/acms all-in-one image referenced by docker-compose.yml, which is in
-# preparation. Until it is published, point `image:` in docker-compose.yml at a runtime you have.
-# If your plugin needs a developer license, add it as a repository secret and expose it below.
+# It relies on the appleple/acms all-in-one image referenced by docker-compose.yml.
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -17,8 +15,6 @@ jobs:
 
       - name: Start a-blog cms + MySQL
         run: docker compose up -d --wait
-        # env:
-        #   ACMS_LICENSE_KEY: ${{ secrets.ACMS_LICENSE_KEY }}
 
       - name: Install dependencies
         run: docker compose exec -T acms bash -lc "cd /workspace && composer install --no-interaction --no-progress"
