@@ -12,9 +12,8 @@ parameters:
         # Type-check the tests too. They rely on the base classes shipped by
         # appleple/acms-testing-framework (resolved via the extension include above).
         - tests
-    bootstrapFiles:
-        # Declares runtime constants (PLUGIN_DIR, ...) that PHPStan can't see statically.
-        - phpstan-bootstrap.php
+    # PLUGIN_DIR / PLUGIN_LIB_DIR and other core constants are supplied by the extension include
+    # above (appleple/acms-testing-framework), so no per-plugin bootstrap file is needed here.
     scanDirectories:
         # a-blog cms core (needed to resolve core classes/functions). Adjust to your environment.
         # With the bundled docker-compose.yml the core lives here:
