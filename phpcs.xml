@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<ruleset name="acms-plugin-skeleton">
+  <rule ref="PSR12"/>
+
+  <rule ref="PHPCompatibility"/>
+  <!-- Production targets PHP 8.1 through 8.5 -->
+  <config name="testVersion" value="8.1-8.5"/>
+
+  <!-- Disallow the long array() syntax -->
+  <rule ref="Generic.Arrays.DisallowLongArraySyntax"/>
+  <!-- Detect deprecated function usage -->
+  <rule ref="Generic.PHP.DeprecatedFunctions"/>
+  <!-- Detect leftover git merge conflict markers -->
+  <rule ref="Generic.VersionControl.GitMergeConflict"/>
+
+  <arg name="extensions" value="php"/>
+  <arg name="colors"/>
+  <arg value="ps"/>
+
+  <file>src</file>
+  <file>tests</file>
+
+  <exclude-pattern>*/vendor/*</exclude-pattern>
+</ruleset>

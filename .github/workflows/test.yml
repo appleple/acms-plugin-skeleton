@@ -1,0 +1,40 @@
+name: Test
+
+on: [push, pull_request]
+
+# Sample CI workflow (self-contained). It boots a-blog cms + MySQL with the bundled
+# docker-compose.yml, then runs composer install + acms-create-database + phpunit inside the
+# container (the same steps you run locally).
+#
+# It relies on the appleple/acms all-in-one image referenced by docker-compose.yml, which is in
+# preparation. Until it is published, point `image:` in docker-compose.yml at a runtime you have.
+# If your plugin needs a developer license, add it as a repository secret and expose it below.
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start a-blog cms + MySQL
+        run: docker compose up -d --wait
+        # env:
+        #   ACMS_LICENSE_KEY: ${{ secrets.ACMS_LICENSE_KEY }}
+
+      - name: Install dependencies
+        run: docker compose exec -T acms bash -lc "cd /workspace && composer install --no-interaction --no-progress"
+
+      - name: Coding standards (PHP_CodeSniffer)
+        run: docker compose exec -T acms bash -lc "cd /workspace && composer lint"
+
+      - name: Static analysis (PHPStan)
+        run: docker compose exec -T acms bash -lc "cd /workspace && composer analyse"
+
+      - name: Create the test database schema
+        run: docker compose exec -T acms bash -lc "cd /workspace && vendor/bin/acms-create-database"
+
+      - name: Run PHPUnit
+        run: docker compose exec -T acms bash -lc "cd /workspace && vendor/bin/phpunit"
+
+      - name: Show a-blog cms logs on failure
+        if: failure()
+        run: docker compose logs acms
