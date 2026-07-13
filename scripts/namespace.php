@@ -5,13 +5,13 @@ declare(strict_types=1);
 /**
  * One-time initializer, run after `composer create-project`.
  *
- * Replaces the placeholder name "Skeleton" / "appleple/acms-plugin-skeleton" with your plugin name:
+ * Replaces the placeholder name "Skeleton" / "ablogcms/plugin-skeleton" with your plugin name:
  *   - Namespace:   Acms\Plugins\Skeleton\  → Acms\Plugins\{StudlyName}\
- *   - Package:     appleple/acms-plugin-skeleton → appleple/acms-plugin-{kebab-name}
+ *   - Package:     ablogcms/plugin-skeleton → ablogcms/{kebab-name}
  *   - Identifiers: config keys, Twig namespace, menu key, ServiceProvider $name, etc.
  *
  * Afterwards it removes itself and the composer.json post-create-project-cmd entry.
- * You can also run it manually:  php scripts/rename-namespace.php MyAwesomePlugin
+ * You can also run it manually:  php scripts/namespace.php MyAwesomePlugin
  */
 
 $root = dirname(__DIR__);
@@ -37,9 +37,9 @@ if ($studly === 'Skeleton') {
 // Text file extensions to process (vendor / .git are skipped).
 $extensions = ['php', 'json', 'xml', 'dist', 'md', 'yml', 'yaml', 'twig', 'html', 'example', 'gitignore'];
 
-// Order matters: the package string is replaced before the bare "skeleton" token.
+// Order matters: the package name is replaced before the bare "skeleton" token.
 $replacements = [
-    'acms-plugin-skeleton' => 'acms-plugin-' . $kebab,
+    'plugin-skeleton' => $kebab,
     'SKELETON' => $upper,
     'Skeleton' => $studly,
     'skeleton' => $snake,
@@ -59,13 +59,14 @@ foreach (collectFiles($root, $extensions) as $file) {
 }
 
 removeSelfFromComposer($root . '/composer.json');
+// Remove this one-time bootstrap. We do NOT remove scripts/ itself: the release helpers
+// (Packager.php, package.php, version.php, release.php) live alongside it and must stay.
 @unlink(__FILE__);
-@rmdir(__DIR__);
 
 echo "\n";
 echo "Plugin name applied.\n";
 echo "  Namespace : Acms\\Plugins\\{$studly}\\\n";
-echo "  Package   : appleple/acms-plugin-{$kebab}\n";
+echo "  Package   : ablogcms/{$kebab}\n";
 echo "  Files updated: {$changed}\n\n";
 echo "Next steps:\n";
 echo "  1) cp .env.example .env\n";
