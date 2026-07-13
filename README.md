@@ -161,16 +161,17 @@ Two optional keys in `composer.json` tune packaging without touching `scripts/`:
 ```jsonc
 "extra": {
   "acms-plugin-tools": {
-    "extras": ["README.md"],    // root paths bundled alongside src/ (default: README.md, LICENSE, images)
-    "versionInZipName": false   // true → build {Name}{version}.zip instead of {Name}.zip
+    "extras": ["README.md"],        // root paths bundled alongside src/ (default: README.md, LICENSE, images)
+    "zipFileName": "{pluginName}"   // built zip name template (default: "{pluginName}")
   }
 }
 ```
 
 - **`extras`** — set this when the plugin keeps its docs elsewhere, e.g. `["docs"]`.
-- **`versionInZipName`** — when `true`, the zip is named `{Name}{version}.zip` so the version stays
-  visible in the filename (handy when the artifact is downloaded and distributed by hand). Works the
-  same regardless of host.
+- **`zipFileName`** — template for the built zip's base name. Placeholders: `{pluginName}` and
+  `{version}`. The default `"{pluginName}"` yields `{Name}.zip`; use `"{pluginName}v{version}"` to
+  keep the version in the filename (`{Name}v{version}.zip`) — handy when the artifact is downloaded
+  and distributed by hand. Works the same regardless of host.
 
 Which CI builds and publishes the zip on a `v*` tag is decided by the workflow file you keep, not by
 config: `.github/workflows/release.yml` (GitHub Release) or `bitbucket-pipelines.yml` (pipeline
