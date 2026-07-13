@@ -134,8 +134,9 @@ another CI provider):
 Dependabot (`.github/dependabot.yml`) opens weekly PRs to keep the workflows' GitHub Actions up to
 date; `dependabot-auto-merge.yml` auto-merges patch/minor bumps once checks pass (major bumps are
 reviewed by hand). Auto-merge needs **"Allow auto-merge"** enabled and a branch protection rule
-requiring the Test check on the default branch. Composer is not tracked by Dependabot
-(`ablogcms/testing-framework` is a private package, managed by hand).
+requiring the Test check on the default branch. Composer is not tracked by Dependabot: with no
+committed `composer.lock` it would only surface major bumps, and `ablogcms/testing-framework` is
+matched to the a-blog cms version by hand.
 
 ## Releasing
 

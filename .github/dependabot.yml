@@ -1,10 +1,10 @@
 # Keep the GitHub Actions used by the workflows up to date. Patch and minor bumps are auto-merged
 # by .github/workflows/dependabot-auto-merge.yml once CI passes; major bumps are reviewed by hand.
 #
-# Composer is intentionally not tracked: ablogcms/testing-framework is a private package Dependabot
-# can't resolve without extra registry config, and its constraint is widened by hand
-# (e.g. 3.2.* || 3.3.*) per tested a-blog cms minor. Generated plugins still commit composer.lock
-# for reproducible installs — Dependabot just isn't the tool that maintains it.
+# Composer is intentionally not tracked: the skeleton commits no composer.lock, so Dependabot could
+# only ever propose major constraint bumps here (the dev-tool constraints are loose caret ranges) —
+# low value. ablogcms/testing-framework is version-matched to a-blog cms by hand anyway. Generated
+# plugins commit their own lock and can enable Composer tracking themselves if they want it.
 version: 2
 updates:
   - package-ecosystem: "github-actions"

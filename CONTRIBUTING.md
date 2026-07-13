@@ -39,8 +39,8 @@ If you ever rename or remove that bootstrap, update the guard in `release.yml` a
 
 ## Local development
 
-Tests and static analysis run inside the bundled a-blog cms container (the testing framework and
-core are not available on the host):
+Static analysis and tests run inside the bundled a-blog cms container — they need the a-blog cms
+core, which is not available on the host:
 
 ```bash
 cp .env.example .env
