@@ -31,7 +31,7 @@
   },
   "scripts": {
     "post-create-project-cmd": [
-      "@php -r \"@unlink('LICENSE');\"",
+      "@php -r \"@unlink('LICENSE'); @unlink('CONTRIBUTING.md');\"",
       "@php scripts/namespace.php"
     ],
     "test": "vendor/bin/phpunit",
