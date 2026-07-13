@@ -63,7 +63,9 @@ jobs:
         run: docker compose exec -T acms bash -lc "cd /workspace && composer require --dev --no-interaction --no-progress 'ablogcms/testing-framework:${{ matrix.acms }}.*'"
 
       - name: Create the test database schema
-        run: docker compose exec -T acms bash -lc "cd /workspace && vendor/bin/acms-create-database"
+        # acms-create-database is a standalone CLI, so it does not read phpunit.xml's <env ACMS_ROOT>.
+        # Pass it explicitly — the all-in-one image's a-blog cms core lives at /var/www/html.
+        run: docker compose exec -T acms bash -lc "cd /workspace && ACMS_ROOT=/var/www/html vendor/bin/acms-create-database"
 
       - name: Run PHPUnit
         run: docker compose exec -T acms bash -lc "cd /workspace && vendor/bin/phpunit"
