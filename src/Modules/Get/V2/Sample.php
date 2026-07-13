@@ -20,6 +20,9 @@ use Acms\Plugins\Skeleton\Services\SampleService;
  */
 class Sample extends Base
 {
+    /**
+     * @return array{members: list<array{id: string, name: string}>, count: int}
+     */
     public function get(): array
     {
         $service = new SampleService();

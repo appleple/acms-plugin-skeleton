@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Acms\Plugins\Skeleton\Tests\Unit\Services;
 
 use Acms\Plugins\Skeleton\Services\SampleService;
-use Acms\Testing\TestCase;
+use Acms\TestingFramework\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
 

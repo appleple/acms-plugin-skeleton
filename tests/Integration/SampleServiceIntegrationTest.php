@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Acms\Plugins\Skeleton\Tests\Integration;
 
 use Acms\Plugins\Skeleton\Services\SampleService;
-use Acms\Testing\DatabaseTestCase;
-use Acms\Testing\Seeder\BlogSeeder;
+use Acms\TestingFramework\DatabaseTestCase;
+use Acms\TestingFramework\Seeder\BlogSeeder;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\Attributes\TestDox;
 

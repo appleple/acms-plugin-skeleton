@@ -4,9 +4,9 @@
 # appleple/acms-dev runtime image and drop the core ZIP in manually (see the docs).
 services:
   acms:
-    image: ${ACMS_IMAGE:-appleple/acms:3.2-php8.5}
+    image: appleple/acms:${ACMS_IMAGE_TAG:-3.2-php8.5}
     ports:
-      - "8080:80"
+      - '8080:80'
     environment:
       ACMS_DB_HOST: db
       ACMS_DB_NAME: acms
@@ -15,7 +15,7 @@ services:
     volumes:
       # Production code lives in src/, which is deployed as the plugin itself.
       # Adjust the target path to match the layout of the all-in-one image.
-      - ./src:/var/www/html/ablogcms/extension/plugins/Skeleton
+      - ./src:/var/www/html/extension/plugins/Skeleton
       # The whole repository (composer.json, tests/, src/) — run composer & tests from here.
       - .:/workspace
     depends_on:
@@ -29,7 +29,7 @@ services:
       MYSQL_PASSWORD: acms
       MYSQL_ROOT_PASSWORD: root
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot"]
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-uroot', '-proot']
       interval: 5s
       timeout: 5s
       retries: 20

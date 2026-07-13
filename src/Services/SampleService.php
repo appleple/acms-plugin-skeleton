@@ -50,6 +50,6 @@ class SampleService
 
         $name = Database::query($sql->get(dsn()), 'one');
 
-        return $name === false ? null : (string) $name;
+        return is_string($name) ? $name : null;
     }
 }

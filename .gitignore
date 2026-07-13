@@ -2,12 +2,16 @@
 /vendor/
 composer.lock
 
+# Release artifacts (scripts/package.php output)
+/build/
+
 # PHPUnit
 .phpunit.cache/
 .phpunit.result.cache
 /coverage/
 
-# PHPStan (local config override + result cache)
+# Local config overrides + tool caches
+/phpcs.xml
 /phpstan.neon
 .phpstan.cache/
 
@@ -19,3 +23,11 @@ composer.lock
 Thumbs.db
 .idea/
 .vscode/
+
+# AI
+.claude/
+!.claude/skills
+.cursor/
+.codex/
+.gemini/
+*.local.md

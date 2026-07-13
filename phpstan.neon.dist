@@ -1,8 +1,8 @@
 includes:
-    # Provided by appleple/acms-testing-framework: stubs + constants for a-blog cms core symbols.
-    - vendor/appleple/acms-testing-framework/phpstan/extension.neon
+    # Provided by ablogcms/testing-framework: stubs + constants for a-blog cms core symbols.
+    - vendor/ablogcms/testing-framework/phpstan/extension.neon
 parameters:
-    level: 5
+    level: max
     # Production targets PHP 8.1 through 8.5; analyse across that range.
     phpVersion:
         min: 80100
@@ -10,11 +10,9 @@ parameters:
     paths:
         - src
         # Type-check the tests too. They rely on the base classes shipped by
-        # appleple/acms-testing-framework (resolved via the extension include above).
+        # ablogcms/testing-framework (resolved via the extension include above).
         - tests
-    # PLUGIN_DIR / PLUGIN_LIB_DIR and other core constants are supplied by the extension include
-    # above (appleple/acms-testing-framework), so no per-plugin bootstrap file is needed here.
     scanDirectories:
         # a-blog cms core (needed to resolve core classes/functions). Adjust to your environment.
         # With the bundled docker-compose.yml the core lives here:
-        - /var/www/html/ablogcms/php
+        - /var/www/html/php

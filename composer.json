@@ -1,8 +1,8 @@
 {
-  "name": "appleple/acms-plugin-skeleton",
+  "name": "ablogcms/plugin-skeleton",
   "description": "Skeleton for a-blog cms plugin development, with a PHPUnit setup based on the bundled SamplePlugin",
   "type": "project",
-  "license": "proprietary",
+  "license": "MIT",
   "authors": [
     {
       "name": "appleple",
@@ -13,10 +13,11 @@
     "php": "^8.1"
   },
   "require-dev": {
-    "appleple/acms-testing-framework": "3.2.*",
+    "ablogcms/testing-framework": "3.2.*",
+    "ext-zip": "*",
     "phpstan/phpstan": "^2.1",
     "squizlabs/php_codesniffer": "^3.9",
-    "phpcompatibility/php-compatibility": "*"
+    "phpcompatibility/php-compatibility": "^10.0@dev"
   },
   "autoload": {
     "psr-4": {
@@ -30,22 +31,30 @@
   },
   "scripts": {
     "post-create-project-cmd": [
-      "@php scripts/rename-namespace.php"
+      "@php -r \"@unlink('LICENSE');\"",
+      "@php scripts/namespace.php"
     ],
-    "post-install-cmd": "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility",
-    "post-update-cmd": "\"vendor/bin/phpcs\" --config-set installed_paths vendor/phpcompatibility/php-compatibility",
     "test": "vendor/bin/phpunit",
-    "lint": "vendor/bin/phpcs --standard=phpcs.xml",
-    "format": "vendor/bin/phpcbf --standard=phpcs.xml",
+    "lint": "vendor/bin/phpcs --standard=phpcs.xml.dist",
+    "format": "vendor/bin/phpcbf --standard=phpcs.xml.dist",
     "analyse": "vendor/bin/phpstan analyse",
     "check": [
       "@lint",
       "@analyse",
       "@test"
-    ]
+    ],
+    "package": "@php scripts/package.php",
+    "version:set": "@php scripts/version.php",
+    "release:patch": "@php scripts/release.php patch",
+    "release:minor": "@php scripts/release.php minor",
+    "release:major": "@php scripts/release.php major"
   },
   "prefer-stable": true,
   "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "phpcsstandards/composer-installer": true
+    },
     "sort-packages": true,
     "platform": {
       "php": "8.5.0"
