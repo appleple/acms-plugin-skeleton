@@ -60,7 +60,9 @@ try {
 
     $run('add -A');
     $run('commit -m ' . escapeshellarg($tag));
-    $run('tag ' . escapeshellarg($tag));
+    // Annotated tag: `git push --follow-tags` only pushes annotated tags, so a lightweight
+    // `git tag <tag>` would never reach the remote and the Release workflow would not fire.
+    $run('tag -a ' . escapeshellarg($tag) . ' -m ' . escapeshellarg($tag));
 
     if ($push) {
         $run('push --follow-tags');
