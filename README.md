@@ -2,13 +2,12 @@
 
 A starter skeleton for developing an **a-blog cms** plugin. It is based on the `SamplePlugin`
 bundled with a-blog cms, lightly modernized, and comes with a ready-to-run **PHPUnit** setup
-(`appleple/acms-testing-framework`).
+(`ablogcms/testing-framework`).
 
 ## Requirements
 
-- **Production:** PHP 8.1 – 8.5 (`require.php` is `^8.1`).
-- **Development / CI:** PHP 8.5 (`config.platform.php` is `8.5.0`; the bundled Docker image is
-  `php8.5`). Coding standards (phpcs) and static analysis (phpstan) check the whole 8.1 – 8.5 range.
+- **PHP:** 8.1 – 8.5
+- **a-blog cms:** 3.2.27 or later (3.3 is not tested yet)
 
 ## What's inside
 
@@ -24,13 +23,14 @@ bundled with a-blog cms, lightly modernized, and comes with a ready-to-run **PHP
 | `src/Services/SampleService.php` | Business logic extracted so it can be unit tested. |
 | `src/template/…` | Twig settings screen (`acms_config`) + module config/select templates. |
 | `tests/` | `Unit/` (no DB) and `Integration/` (DB, auto rollback). |
-| `.github/workflows/test.yml` | Sample CI workflow. |
+| `scripts/*.php` | Release chores (packaging / versioning) run via Composer scripts. |
+| `.github/workflows/` | Sample CI: `test.yml` (checks) and `release.yml` (publish on a `v*` tag). |
 
 ## Quick start
 
 ```bash
 # 1. Generate your plugin from this skeleton (you'll be asked for a name).
-composer create-project appleple/acms-plugin-skeleton my-awesome-plugin
+composer create-project ablogcms/plugin-skeleton my-awesome-plugin
 cd my-awesome-plugin
 
 # 2. Start a-blog cms + MySQL.
@@ -65,15 +65,12 @@ Production code lives in **`src/`**, tests in **`tests/`**, and config files at 
 └── .github/workflows/test.yml
 ```
 
-`src/` **is the plugin root**: when a-blog cms runs, `extension/plugins/{Name}/` points at this
-repository's `src/` (a symlink or bind-mount — `docker-compose.yml` does exactly this). The core
-autoloader maps `Acms\Plugins\ → extension/plugins/`, so `Acms\Plugins\Skeleton\ServiceProvider`
-resolves to `src/ServiceProvider.php`. That is why classes under `src/` carry no extra `src`
-namespace segment (e.g. `src/Services/SampleService.php` is `Acms\Plugins\Skeleton\Services\SampleService`).
-
-The `ServiceProvider` must be resolvable by the core autoloader alone: when a plugin is activated,
-a-blog cms instantiates `Acms\Plugins\{Name}\ServiceProvider` before the plugin's own autoloader is
-available. It sits at the top of `src/` for that reason.
+`src/` **is the plugin root**: at runtime `extension/plugins/{Name}/` points at this repository's
+`src/` (a symlink or bind-mount — `docker-compose.yml` does this). The core autoloader maps
+`Acms\Plugins\ → extension/plugins/`, so `Acms\Plugins\Skeleton\Services\SampleService` resolves to
+`src/Services/SampleService.php` — that is why classes under `src/` carry no extra `src` namespace
+segment, and why `ServiceProvider` sits at the top of `src/` (the core instantiates it before the
+plugin's own autoloader exists).
 
 ## Testing
 
@@ -81,15 +78,15 @@ Keep handlers thin and move logic into services, then test the services.
 
 | Target | Test? | Base class |
 |---|---|---|
-| `Services/*` pure logic | ✅ Unit | `Acms\Testing\TestCase` |
-| DB-backed logic | ✅ Integration | `Acms\Testing\DatabaseTestCase` |
+| `Services/*` pure logic | ✅ Unit | `Acms\TestingFramework\TestCase` |
+| DB-backed logic | ✅ Integration | `Acms\TestingFramework\DatabaseTestCase` |
 | `GET/*` / `POST/*` / V2 modules | ❌ | covered indirectly via services |
 
-Test data is created with `Acms\Testing\Seeder\*` (Blog / Category / User / Entry / …). Integration
+Test data is created with `Acms\TestingFramework\Seeder\*` (Blog / Category / User / Entry / …). Integration
 tests run inside a transaction that is rolled back automatically.
 
 The PHPUnit bootstrap comes from the testing framework: `phpunit.xml.dist` points at
-`vendor/appleple/acms-testing-framework/bootstrap.php`, so there is no `tests/bootstrap.php` to
+`vendor/ablogcms/testing-framework/bootstrap.php`, so there is no `tests/bootstrap.php` to
 maintain. If you need custom setup, add a `tests/bootstrap.php` that `require`s that shared entry and
 point `bootstrap` in `phpunit.xml.dist` back at it.
 
@@ -110,30 +107,59 @@ vendor/bin/phpunit
 Composer scripts wrap the tooling:
 
 ```bash
-composer lint      # PHP_CodeSniffer (PSR-12 + PHPCompatibility) — phpcs.xml
-composer analyse   # PHPStan (level 5) — phpstan.neon.dist
+composer lint      # PHP_CodeSniffer (PSR-12 + PHPCompatibility) — phpcs.xml.dist
+composer analyse   # PHPStan (level max) — phpstan.neon.dist
 composer test      # PHPUnit
 composer check     # all three
 composer format    # phpcbf (auto-fix coding standard)
 ```
 
 PHPStan resolves a-blog cms core symbols via the extension shipped with
-`appleple/acms-testing-framework`; set `scanDirectories` in `phpstan.neon.dist` to your core path
+`ablogcms/testing-framework`; set `scanDirectories` in `phpstan.neon.dist` to your core path
 (the default matches the bundled docker-compose). For a local override, create `phpstan.neon`
 (git-ignored).
 
 ## Continuous integration
 
-`.github/workflows/test.yml` is a **sample** self-contained workflow: it boots a-blog cms + MySQL
-with `docker-compose.yml` and runs **coding standards (phpcs), static analysis (phpstan) and tests
-(phpunit)** in the container. Adjust it (image tag, PHP/DB versions) for your host, or replace it
-with Bitbucket Pipelines / CircleCI if you prefer.
+Two sample workflows are included (adjust image tags / PHP versions for your host, or swap in
+another CI provider):
+
+- **`test.yml`** — on every push / PR, boots a-blog cms + MySQL with `docker-compose.yml` and runs
+  `composer lint` / `analyse` / `test` in the container.
+- **`release.yml`** — on a `v*` tag, checks the tag matches `$version`, builds the plugin zip and
+  publishes a GitHub Release (see [Releasing](#releasing)).
+
+Dependabot (`.github/dependabot.yml`) opens weekly PRs to keep the workflows' GitHub Actions up to
+date; `dependabot-auto-merge.yml` auto-merges patch/minor bumps once checks pass (major bumps are
+reviewed by hand). Auto-merge needs **"Allow auto-merge"** enabled and a branch protection rule
+requiring the Test check on the default branch. Composer is not tracked (no committed
+`composer.lock`).
+
+## Releasing
+
+The version lives in `$version` in `src/ServiceProvider.php` — keep it in sync with the git tag
+(don't add a `version` to `composer.json`). Composer scripts do the rest:
+
+```bash
+composer package             # build build/{Name}.zip (git-ignored)
+composer version:set 1.2.3   # set the version (or: patch | minor | major to bump it)
+composer release:patch       # bump + commit + tag v1.2.3, then push to publish:
+git push --follow-tags       # → release.yml builds and publishes the zip
+```
+
+The zip's top folder matches the plugin name (from the `autoload.psr-4` key) — what a-blog cms
+installs as `extension/plugins/{Name}/`. Plugins that bundle runtime Composer packages can add a
+`src/composer.json`; `composer package` vendors it into `src/vendor/` and includes it in the zip.
 
 ## Renaming
 
-`composer create-project` runs `scripts/rename-namespace.php`, which replaces `Skeleton` /
-`appleple/acms-plugin-skeleton` with your plugin name and then removes itself. To run it manually:
+`composer create-project` runs `scripts/namespace.php`, which replaces `Skeleton` /
+`ablogcms/plugin-skeleton` with your plugin name and then removes itself. To run it manually:
 
 ```bash
-php scripts/rename-namespace.php MyAwesomePlugin
+php scripts/namespace.php MyAwesomePlugin
 ```
+
+## License
+
+This skeleton is released under the MIT License (see [`LICENSE`](LICENSE)).
