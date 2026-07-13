@@ -124,8 +124,10 @@ PHPStan resolves a-blog cms core symbols via the extension shipped with
 Two sample workflows are included (adjust image tags / PHP versions for your host, or swap in
 another CI provider):
 
-- **`test.yml`** — on every push / PR, boots a-blog cms + MySQL with `docker-compose.yml` and runs
-  `composer lint` / `analyse` / `test` in the container.
+- **`test.yml`** — on every push / PR, boots a-blog cms + MySQL with `docker-compose.yml`, runs
+  `lint` / `analyse` once, and runs PHPUnit across a matrix of PHP and a-blog cms versions (defined
+  in the workflow). Require the aggregate **`test`** job in branch protection — not the individual
+  matrix cells — so new versions can be added without touching the ruleset.
 - **`release.yml`** — on a `v*` tag, checks the tag matches `$version`, builds the plugin zip and
   publishes a GitHub Release (see [Releasing](#releasing)).
 
