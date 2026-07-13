@@ -154,28 +154,28 @@ The zip's top folder matches the plugin name (from the `autoload.psr-4` key) —
 installs as `extension/plugins/{Name}/`. Plugins that bundle runtime Composer packages can add a
 `src/composer.json`; `composer package` vendors it into `src/vendor/` and includes it in the zip.
 
-### Configuration (`extra.acms-plugin`)
+### Configuration (`extra.acms-plugin-tools`)
 
 Two optional keys in `composer.json` tune packaging without touching `scripts/`:
 
 ```jsonc
 "extra": {
-  "acms-plugin": {
-    "release": "github",        // "github" (default) or "bitbucket" — see below
-    "extras": ["README.md"]     // root paths bundled alongside src/ (default: README.md, LICENSE, images)
+  "acms-plugin-tools": {
+    "extras": ["README.md"],    // root paths bundled alongside src/ (default: README.md, LICENSE, images)
+    "versionInZipName": false   // true → build {Name}{version}.zip instead of {Name}.zip
   }
 }
 ```
 
 - **`extras`** — set this when the plugin keeps its docs elsewhere, e.g. `["docs"]`.
-- **`release`** — which CI builds and ships the zip on a `v*` tag:
-  - `github` — `.github/workflows/release.yml` builds `{Name}.zip` and publishes a GitHub Release.
-  - `bitbucket` — `bitbucket-pipelines.yml` builds `{Name}{version}.zip` (the version stays in the
-    filename) and stores it as a pipeline artifact to download from the Bitbucket UI. Delete the
-    `.github/` workflows you do not use.
+- **`versionInZipName`** — when `true`, the zip is named `{Name}{version}.zip` so the version stays
+  visible in the filename (handy when the artifact is downloaded and distributed by hand). Works the
+  same regardless of host.
 
-Either way the CI builds the zip, so `build/` is git-ignored and `composer release:*` only bumps the
-version, commits, and tags.
+Which CI builds and publishes the zip on a `v*` tag is decided by the workflow file you keep, not by
+config: `.github/workflows/release.yml` (GitHub Release) or `bitbucket-pipelines.yml` (pipeline
+artifact you download from the Bitbucket UI). Delete the one you do not use. Either way the CI builds
+the zip, so `build/` is git-ignored and `composer release:*` only bumps the version, commits, and tags.
 
 ## Renaming
 

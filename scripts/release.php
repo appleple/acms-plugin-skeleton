@@ -66,7 +66,7 @@ try {
 
     if ($push) {
         $run('push --follow-tags');
-        echo "Pushed {$tag}. The Release workflow will build and publish the package.\n";
+        echo "Pushed {$tag}. CI (release.yml / bitbucket-pipelines.yml) builds and publishes the zip for this tag.\n";
     } else {
         echo "\nCreated local tag {$tag}. To publish, push it:\n";
         echo "  git push --follow-tags\n";

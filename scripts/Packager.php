@@ -50,23 +50,19 @@ final class Packager
     }
 
     /**
-     * Release mode from composer.json `extra.acms-plugin.release`:
-     *   "github"    – GitHub Actions builds the zip on a v* tag and publishes a GitHub Release
-     *                 (zip name {Name}.zip; the version lives in the release/tag).
-     *   "bitbucket" – Bitbucket Pipelines builds the zip on a v* tag and exposes it as an artifact
-     *                 (zip name {Name}{version}.zip so the version is visible in the filename).
-     * Either way the CI builds/publishes the zip and build/ stays out of git. Defaults to "github".
+     * Whether the built zip's filename carries the version (e.g. Skeleton1.2.3.zip). Useful when the
+     * artifact travels as a bare file (downloaded from CI, uploaded to Drive, etc.) and the version
+     * must stay recognizable. Independent of where/how the plugin is published — set it on GitHub or
+     * Bitbucket alike. composer.json `extra.acms-plugin-tools.versionInZipName` (bool, default false).
      */
-    public function releaseMode(): string
+    public function versionInZipName(): bool
     {
-        $mode = $this->extraConfig()['release'] ?? 'github';
-
-        return in_array($mode, ['github', 'bitbucket'], true) ? $mode : 'github';
+        return (bool) ($this->extraConfig()['versionInZipName'] ?? false);
     }
 
     /**
      * Root-level paths bundled alongside src/. Override via composer.json
-     * `extra.acms-plugin.extras`; defaults to self::DEFAULT_EXTRAS.
+     * `extra.acms-plugin-tools.extras`; defaults to self::DEFAULT_EXTRAS.
      *
      * @return list<string>
      */
@@ -81,14 +77,14 @@ final class Packager
     }
 
     /**
-     * Base name (without extension) of the built zip. The "bitbucket" mode appends the version
-     * (e.g. Skeleton1.2.3) so the artifact is identifiable once downloaded from the pipeline.
+     * Base name (without extension) of the built zip: the plugin name, plus the version when
+     * versionInZipName() is enabled (e.g. Skeleton1.2.3).
      */
     public function zipBaseName(): string
     {
         $name = $this->pluginName();
 
-        return $this->releaseMode() === 'bitbucket' ? $name . $this->currentVersion() : $name;
+        return $this->versionInZipName() ? $name . $this->currentVersion() : $name;
     }
 
     /**
@@ -271,7 +267,8 @@ final class Packager
     }
 
     /**
-     * The `extra.acms-plugin` object from composer.json (release mode / extras), or [] if absent.
+     * The `extra.acms-plugin-tools` object from composer.json (extras / versionInZipName), or []
+     * if absent.
      *
      * @return array<string, mixed>
      */
@@ -279,7 +276,7 @@ final class Packager
     {
         /** @var array<string, mixed>|null $data */
         $data = json_decode($this->composerContents(), true);
-        $config = $data['extra']['acms-plugin'] ?? [];
+        $config = $data['extra']['acms-plugin-tools'] ?? [];
 
         return is_array($config) ? $config : [];
     }
