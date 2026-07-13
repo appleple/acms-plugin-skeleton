@@ -31,7 +31,7 @@ final class Packager
 
     /**
      * Default root-level files/dirs bundled alongside src/ when present. Override per plugin via
-     * composer.json `extra.acms-plugin.extras` (e.g. ["docs"]). `images/` is the plugin thumbnail
+     * composer.json `extra.acms-plugin-tools.extras` (e.g. ["docs"]). `images/` is the plugin thumbnail
      * a-blog cms shows in the admin; LICENSE is removed by post-create-project, so it is only
      * bundled when the plugin author added one back.
      */
