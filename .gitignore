@@ -1,6 +1,7 @@
 # Composer
 /vendor/
-composer.lock
+# composer.lock is committed: plugins built from this skeleton are applications, so a locked,
+# reproducible dependency set is desirable (Composer's recommendation for project-type packages).
 
 # Release artifacts (scripts/package.php output)
 /build/
