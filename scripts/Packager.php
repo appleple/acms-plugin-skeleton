@@ -266,7 +266,7 @@ final class Packager
     }
 
     /**
-     * The `extra.acms-plugin-tools` object from composer.json (extras / versionInZipName), or []
+     * The `extra.acms-plugin-tools` object from composer.json (extras / zipFileName), or []
      * if absent.
      *
      * @return array<string, mixed>
