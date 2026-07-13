@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Acms\Plugins\Skeleton\Scripts;
+namespace Acms\PluginTools;
 
 use FilesystemIterator;
 use RecursiveDirectoryIterator;
@@ -30,11 +30,12 @@ final class Packager
     private const IGNORES = ['composer.json', 'composer.lock'];
 
     /**
-     * Root-level files/dirs copied into the plugin folder when present. `images/` is the plugin
-     * thumbnail a-blog cms shows in the admin; LICENSE is removed by post-create-project, so it is
-     * only bundled when the plugin author added one back.
+     * Default root-level files/dirs bundled alongside src/ when present. Override per plugin via
+     * composer.json `extra.acms-plugin.extras` (e.g. ["docs"]). `images/` is the plugin thumbnail
+     * a-blog cms shows in the admin; LICENSE is removed by post-create-project, so it is only
+     * bundled when the plugin author added one back.
      */
-    private const EXTRAS = ['README.md', 'LICENSE', 'images'];
+    private const DEFAULT_EXTRAS = ['README.md', 'LICENSE', 'images'];
 
     public function __construct(private string $root)
     {
@@ -45,12 +46,49 @@ final class Packager
      */
     public function pluginName(): string
     {
-        $composerJson = $this->root . '/composer.json';
-        if (!is_file($composerJson)) {
-            throw new RuntimeException("composer.json not found at {$composerJson}");
+        return self::pluginNameFromComposer($this->composerContents());
+    }
+
+    /**
+     * Release mode from composer.json `extra.acms-plugin.release`:
+     *   "github"    – GitHub Actions builds the zip on a v* tag and publishes a GitHub Release
+     *                 (zip name {Name}.zip; the version lives in the release/tag).
+     *   "bitbucket" – Bitbucket Pipelines builds the zip on a v* tag and exposes it as an artifact
+     *                 (zip name {Name}{version}.zip so the version is visible in the filename).
+     * Either way the CI builds/publishes the zip and build/ stays out of git. Defaults to "github".
+     */
+    public function releaseMode(): string
+    {
+        $mode = $this->extraConfig()['release'] ?? 'github';
+
+        return in_array($mode, ['github', 'bitbucket'], true) ? $mode : 'github';
+    }
+
+    /**
+     * Root-level paths bundled alongside src/. Override via composer.json
+     * `extra.acms-plugin.extras`; defaults to self::DEFAULT_EXTRAS.
+     *
+     * @return list<string>
+     */
+    public function extras(): array
+    {
+        $configured = $this->extraConfig()['extras'] ?? null;
+        if (is_array($configured)) {
+            return array_values(array_filter(array_map('strval', $configured), static fn($s) => $s !== ''));
         }
 
-        return self::pluginNameFromComposer((string) file_get_contents($composerJson));
+        return self::DEFAULT_EXTRAS;
+    }
+
+    /**
+     * Base name (without extension) of the built zip. The "bitbucket" mode appends the version
+     * (e.g. Skeleton1.2.3) so the artifact is identifiable once downloaded from the pipeline.
+     */
+    public function zipBaseName(): string
+    {
+        $name = $this->pluginName();
+
+        return $this->releaseMode() === 'bitbucket' ? $name . $this->currentVersion() : $name;
     }
 
     /**
@@ -98,7 +136,7 @@ final class Packager
         $this->removeTree($stageDir);
         $this->copyTree($srcDir, $stageDir);
 
-        foreach (self::EXTRAS as $extra) {
+        foreach ($this->extras() as $extra) {
             $from = $this->root . '/' . $extra;
             if (file_exists($from)) {
                 $this->copyTree($from, $stageDir . '/' . $extra);
@@ -109,7 +147,7 @@ final class Packager
             $this->removeTree($stageDir . '/' . $ignore);
         }
 
-        $zipPath = $buildDir . '/' . $name . '.zip';
+        $zipPath = $buildDir . '/' . $this->zipBaseName() . '.zip';
         $this->zipTree($stageDir, $name, $zipPath);
         $this->removeTree($stageDir);
 
@@ -221,6 +259,30 @@ final class Packager
     // ---------------------------------------------------------------------
     // Filesystem / process helpers.
     // ---------------------------------------------------------------------
+
+    private function composerContents(): string
+    {
+        $composerJson = $this->root . '/composer.json';
+        if (!is_file($composerJson)) {
+            throw new RuntimeException("composer.json not found at {$composerJson}");
+        }
+
+        return (string) file_get_contents($composerJson);
+    }
+
+    /**
+     * The `extra.acms-plugin` object from composer.json (release mode / extras), or [] if absent.
+     *
+     * @return array<string, mixed>
+     */
+    private function extraConfig(): array
+    {
+        /** @var array<string, mixed>|null $data */
+        $data = json_decode($this->composerContents(), true);
+        $config = $data['extra']['acms-plugin'] ?? [];
+
+        return is_array($config) ? $config : [];
+    }
 
     private function serviceProviderPath(): string
     {

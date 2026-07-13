@@ -154,6 +154,29 @@ The zip's top folder matches the plugin name (from the `autoload.psr-4` key) —
 installs as `extension/plugins/{Name}/`. Plugins that bundle runtime Composer packages can add a
 `src/composer.json`; `composer package` vendors it into `src/vendor/` and includes it in the zip.
 
+### Configuration (`extra.acms-plugin`)
+
+Two optional keys in `composer.json` tune packaging without touching `scripts/`:
+
+```jsonc
+"extra": {
+  "acms-plugin": {
+    "release": "github",        // "github" (default) or "bitbucket" — see below
+    "extras": ["README.md"]     // root paths bundled alongside src/ (default: README.md, LICENSE, images)
+  }
+}
+```
+
+- **`extras`** — set this when the plugin keeps its docs elsewhere, e.g. `["docs"]`.
+- **`release`** — which CI builds and ships the zip on a `v*` tag:
+  - `github` — `.github/workflows/release.yml` builds `{Name}.zip` and publishes a GitHub Release.
+  - `bitbucket` — `bitbucket-pipelines.yml` builds `{Name}{version}.zip` (the version stays in the
+    filename) and stores it as a pipeline artifact to download from the Bitbucket UI. Delete the
+    `.github/` workflows you do not use.
+
+Either way the CI builds the zip, so `build/` is git-ignored and `composer release:*` only bumps the
+version, commits, and tags.
+
 ## Renaming
 
 `composer create-project` runs `scripts/namespace.php`, which replaces `Skeleton` /

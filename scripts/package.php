@@ -15,7 +15,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/Packager.php';
 
-use Acms\Plugins\Skeleton\Scripts\Packager;
+use Acms\PluginTools\Packager;
 
 $root = dirname(__DIR__);
 

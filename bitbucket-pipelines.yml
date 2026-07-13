@@ -1,0 +1,41 @@
+# Bitbucket Pipelines for plugins hosted on Bitbucket.
+#
+# Use this instead of .github/workflows/release.yml when the repository lives on Bitbucket, and set
+#   "extra": { "acms-plugin": { "release": "bitbucket" } }
+# in composer.json so scripts/package.php names the zip {Name}{version}.zip (the version stays
+# visible in the filename after you download it).
+#
+# Pushing a v* tag builds the zip and stores it as a pipeline artifact — download it from the
+# pipeline result page and distribute it (e.g. upload to Google Drive). No repository secrets needed.
+image: php:8.5
+
+pipelines:
+  default:
+    - step:
+        name: Lint
+        caches:
+          - composer
+        script:
+          - apt-get update && apt-get install -y unzip git
+          - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+          - export COMPOSER_ALLOW_SUPERUSER=1
+          - composer install --no-progress --prefer-dist
+          - composer lint
+
+  tags:
+    'v*':
+      - step:
+          name: Build release zip
+          caches:
+            - composer
+          script:
+            - apt-get update && apt-get install -y unzip git libzip-dev
+            - docker-php-ext-install zip
+            - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+            - export COMPOSER_ALLOW_SUPERUSER=1
+            # Fail fast if the tag (vX.Y.Z) and src/ServiceProvider.php $version disagree.
+            - php scripts/package.php --check-version="${BITBUCKET_TAG#v}"
+            # Build build/{Name}{version}.zip
+            - php scripts/package.php
+          artifacts:
+            - build/*.zip
