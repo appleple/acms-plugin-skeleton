@@ -53,7 +53,7 @@ final class Packager
      */
     public function pluginName(): string
     {
-        return self::pluginNameFromComposer($this->composerContents());
+        return self::pluginNameFromComposer($this->composerContents(), $this->sourceDir());
     }
 
     /**
@@ -70,6 +70,18 @@ final class Packager
         }
 
         return self::DEFAULT_EXTRAS;
+    }
+
+    /**
+     * The directory that IS the deployed plugin root; its contents become {Name}/… in the zip and
+     * ServiceProvider.php lives at its top. Defaults to "src"; override via composer.json
+     * `extra.acms-plugin-tools.sourceDir` (e.g. "app") for plugins that keep their PHP under app/.
+     */
+    public function sourceDir(): string
+    {
+        $dir = trim((string) ($this->extraConfig()['sourceDir'] ?? 'src'), '/');
+
+        return $dir !== '' ? $dir : 'src';
     }
 
     /**
@@ -121,12 +133,12 @@ final class Packager
     public function build(): string
     {
         $name = $this->pluginName();
-        $srcDir = $this->root . '/src';
+        $srcDir = $this->root . '/' . $this->sourceDir();
         if (!is_dir($srcDir)) {
-            throw new RuntimeException("src/ not found at {$srcDir}");
+            throw new RuntimeException("Source directory not found at {$srcDir}");
         }
 
-        // If the plugin bundles its own runtime dependencies, vendor them into src/vendor/ first.
+        // If the plugin bundles its own runtime dependencies, vendor them into <sourceDir>/vendor/ first.
         if (is_file($srcDir . '/composer.json')) {
             $this->installRuntimeDeps($srcDir);
         }
@@ -160,7 +172,7 @@ final class Packager
     // Pure helpers (no filesystem side effects) — easy to reason about/reuse.
     // ---------------------------------------------------------------------
 
-    public static function pluginNameFromComposer(string $contents): string
+    public static function pluginNameFromComposer(string $contents, string $sourceDir = 'src'): string
     {
         /** @var array<string, mixed>|null $data */
         $data = json_decode($contents, true);
@@ -173,11 +185,11 @@ final class Packager
             throw new RuntimeException('composer.json has no autoload.psr-4 entry.');
         }
 
-        // Prefer the namespace that maps to src/ (the deployed plugin root).
+        // Prefer the namespace that maps to the source dir (the deployed plugin root).
         $key = null;
         foreach ($psr4 as $namespace => $path) {
             foreach ((array) $path as $p) {
-                if (rtrim((string) $p, '/') === 'src') {
+                if (rtrim((string) $p, '/') === $sourceDir) {
                     $key = (string) $namespace;
                     break 2;
                 }
@@ -289,7 +301,7 @@ final class Packager
 
     private function serviceProviderPath(): string
     {
-        $path = $this->root . '/src/ServiceProvider.php';
+        $path = $this->root . '/' . $this->sourceDir() . '/ServiceProvider.php';
         if (!is_file($path)) {
             throw new RuntimeException("ServiceProvider.php not found at {$path}");
         }
