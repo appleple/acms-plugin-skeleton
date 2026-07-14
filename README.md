@@ -173,10 +173,8 @@ Two optional keys in `composer.json` tune packaging without touching `scripts/`:
   keep the version in the filename (`{Name}v{version}.zip`) — handy when the artifact is downloaded
   and distributed by hand. Works the same regardless of host.
 
-Which CI builds and publishes the zip on a `v*` tag is decided by the workflow file you keep, not by
-config: `.github/workflows/release.yml` (GitHub Release) or `bitbucket-pipelines.yml` (pipeline
-artifact you download from the Bitbucket UI). Delete the one you do not use. Either way the CI builds
-the zip, so `build/` is git-ignored and `composer release:*` only bumps the version, commits, and tags.
+On a `v*` tag, `.github/workflows/release.yml` builds the zip and publishes it as a GitHub Release,
+so `build/` is git-ignored and `composer release:*` only bumps the version, commits, and tags.
 
 ## Renaming
 
