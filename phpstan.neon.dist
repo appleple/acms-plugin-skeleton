@@ -14,7 +14,7 @@ parameters:
         - src
         # Type-check the tests too. They rely on the base classes shipped by
         # ablogcms/testing-framework (resolved via the extension include above).
-        - tests
+        - tests/phpunit
     scanDirectories:
         # a-blog cms core (needed to resolve core classes/functions). Adjust to your environment.
         # With the bundled docker-compose.yml the core lives here:
@@ -27,4 +27,4 @@ parameters:
         # tests instead and keep the rule active for production src/.
         -
             identifier: staticMethod.dynamicCall
-            path: tests/*
+            path: tests/phpunit/*

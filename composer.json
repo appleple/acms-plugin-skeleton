@@ -27,7 +27,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Acms\\Plugins\\Skeleton\\Tests\\": "tests/"
+      "Acms\\Plugins\\Skeleton\\Tests\\": "tests/phpunit/"
     }
   },
   "scripts": {
